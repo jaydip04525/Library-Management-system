@@ -14,21 +14,23 @@ This project is a ** digital library system** that allows both **Admin and Stude
 ## 🚀 Features
 
 ### 👨‍💼 Admin Panel
-- 🔐 Secure Admin Login (Username: `admin`, Password: `1234`)  
-- 📋 View All Available Books  
-- ➕ Add / Donate New Books  
-- 🗑️ Delete Existing Books  
-- 🔎 Search Books by Keyword  
-- 📘 View All Issued Book Records  
-- 💾 Auto-saves all data to JSON  
+- Login with admin credentials (admin / 1234)
+- View all available books
+- Add (donate) new books
+- Delete books
+- View all issued book records
+- Search for books
+- Register new students
+- View all registered students
+- Delete students (automatically removes their issued history)
+- View issue history of any student 
 
 ### 🎓 Student Panel
-- 🆕 Register as New Student  
 - 🔑 Login using Username & Password  
 - 📖 Borrow Available Books  
 - 🔁 Return Borrowed Books  
-- 🔍 Search Books by Keyword or First Letter  
-- 💾 Personal activity stored persistently
+- 🔍 Search Books  
+- 💾 View their own issue history(private)
 
 ---
 
@@ -57,9 +59,7 @@ Login Menu:
 
 2️⃣  Student Login
 
-3️⃣  Register as New Student
-
-4️⃣  Exit
+3️⃣  Exit
 
 ## Student Dashboard:
 
