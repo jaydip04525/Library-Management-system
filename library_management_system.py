@@ -6,7 +6,6 @@ Project: Student Library Management System with Admin & Student Login (Website S
 import datetime
 import json
 import os
-from time import sleep
 
 # ========== Fancy Console Styling ==========
 def line():
@@ -16,10 +15,6 @@ def heading(text):
     line()
     print(f"🌐  {text.center(70)}  🌐")
     line()
-
-def subheading(text):
-    print(f"\n🔹 {text}")
-    print("-" * 60)
 
 def pause():
     input("\nPress Enter to continue...")
@@ -31,255 +26,230 @@ class Library:
 
     def displayAvailableBooks(self):
         heading("📚 AVAILABLE BOOKS")
-        if len(self.books) == 0:
-            print("❌ No books available right now.")
+        if not self.books:
+            print("❌ No books available.")
         else:
             for i, book in enumerate(self.books, start=1):
-                print(f" {i:>2}. {book}")
+                print(f"{i}. {book}")
         pause()
 
     def borrowBook(self, username, bookname):
         if bookname not in self.books:
-            print(f"⚠️ '{bookname}' is not available (might be issued by someone else).")
+            print("⚠️ Book not available.")
         else:
             issue_time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
             track.append({"user": username, "book": bookname, "issued_on": issue_time})
-            print(f"✅ '{bookname}' issued to {username} on {issue_time}.")
             self.books.remove(bookname)
+            print(f"✅ '{bookname}' issued to {username}")
         pause()
 
     def returnBook(self, username, bookname):
-        found = False
         for record in track:
             if record["user"] == username and record["book"].lower() == bookname.lower():
-                found = True
                 track.remove(record)
-                break
-        if found:
-            print(f"✅ '{bookname}' returned successfully by {username}.")
-            self.books.append(bookname)
-        else:
-            print(f"⚠️ No record found for {username} having '{bookname}'.")
+                self.books.append(bookname)
+                print("✅ Book returned.")
+                pause()
+                return
+        print("⚠️ No record found.")
         pause()
 
     def donateBook(self, bookname):
         if bookname in self.books:
-            print(f"⚠️ '{bookname}' already exists in the library.")
+            print("⚠️ Book already exists.")
         else:
             self.books.append(bookname)
-            print(f"🎁 Thank you for donating '{bookname}'! It’s now available for others.")
+            print("🎁 Book added.")
         pause()
 
     def searchBook(self, query):
-        heading(f"🔍 Searching for '{query}'")
-        query = query.strip().lower()
-        results = [book for book in self.books if book[0].lower() == query[0]]
+        heading("🔍 SEARCH RESULT")
+        results = [b for b in self.books if query.lower() in b.lower()]
         if results:
-            print("✅ Found (books starting with the same letter):")
-            for book in results:
-                print(f" - {book}")
+            for b in results:
+                print(b)
         else:
-            print("❌ No books found starting with that letter.")
+            print("❌ Not found.")
         pause()
 
     def deleteBook(self, bookname):
         if bookname in self.books:
             self.books.remove(bookname)
-            print(f"🗑️ '{bookname}' removed from library records.")
+            print("🗑️ Book deleted.")
         else:
-            print(f"⚠️ '{bookname}' not found in library.")
+            print("⚠️ Book not found.")
         pause()
-
-
-# ------------------ Student Class ------------------
-class Student:
-    def __init__(self, username):
-        self.username = username
-
-    def requestBook(self):
-        return input("📖 Enter the name of the book you want to borrow: ").strip()
-
-    def returnBook(self):
-        return input("🔁 Enter the name of the book you want to return: ").strip()
-
 
 # ------------------ File Handling ------------------
 def save_data():
-    with open("books_data.json", "w") as f:
-        json.dump(library.books, f, indent=4)
-    with open("issued_data.json", "w") as f:
-        json.dump(track, f, indent=4)
-    with open("students_data.json", "w") as f:
-        json.dump(students, f, indent=4)
-
+    json.dump(library.books, open("books_data.json","w"), indent=4)
+    json.dump(track, open("issued_data.json","w"), indent=4)
+    json.dump(students, open("students_data.json","w"), indent=4)
 
 def load_data():
-    if os.path.exists("books_data.json"):
-        with open("books_data.json") as f:
-            books = json.load(f)
-    else:
-        books = [
-            "Vistas", "Invention", "Rich & Poor",
-            "Indian Economy", "Macroeconomics",
-            "Gitanjali", "Gora", "Pather Panchali", "Ramayan"
-        ]
-    if os.path.exists("issued_data.json"):
-        with open("issued_data.json") as f:
-            issued = json.load(f)
-    else:
-        issued = []
-    if os.path.exists("students_data.json"):
-        with open("students_data.json") as f:
-            student_list = json.load(f)
-    else:
-        student_list = {}
+    books = json.load(open("books_data.json")) if os.path.exists("books_data.json") else ["Ramayan","Gitanjali","Economics"]
+    issued = json.load(open("issued_data.json")) if os.path.exists("issued_data.json") else []
+    student_list = json.load(open("students_data.json")) if os.path.exists("students_data.json") else {}
     return books, issued, student_list
-
 
 # ------------------ Login System ------------------
 def login():
     heading("🔐 LOGIN PORTAL")
-
-    print("1️⃣  Admin Login")
-    print("2️⃣  Student Login")
-    print("3️⃣  Register as New Student")
-    print("4️⃣  Exit")
+    print("1. Admin Login")
+    print("2. Student Login")
+    print("3. Exit\n")
 
     while True:
         try:
-            user_type = int(input("\n👉 Select (1–4): "))
-
-            # Admin Login
-            if user_type == 1:
-                username = input("👤 Admin username: ")
-                password = input("🔑 Password: ")
-                if username == "admin" and password == "1234":
-                    print("\n✅ Admin login successful.")
-                    sleep(1)
+            ch = int(input("Select (1-3): "))
+            if ch == 1:
+                if input("Admin Username: ")=="admin" and input("Password: ")=="1234":
                     admin_menu()
                     break
                 else:
-                    print("❌ Incorrect credentials.\n")
+                    print("❌ Wrong admin login")
 
-            # Student Login
-            elif user_type == 2:
-                username = input("👤 Username: ")
-                password = input("🔑 Password: ")
-                if username in students and students[username] == password:
-                    print(f"\n✅ Welcome back, {username}!")
-                    sleep(1)
-                    student_menu(username)
+            elif ch == 2:
+                u = input("Username: ")
+                p = input("Password: ")
+                if u in students and students[u]==p:
+                    student_menu(u)
                     break
                 else:
-                    print("❌ Invalid username or password.\n")
+                    print("❌ Invalid login")
 
-            # Register
-            elif user_type == 3:
-                new_user = input("🆕 Choose username: ").strip()
-                if new_user in students:
-                    print("⚠️ Username already exists.")
-                else:
-                    new_pass = input("🔑 Choose password: ").strip()
-                    students[new_user] = new_pass
-                    save_data()
-                    print(f"🎉 Welcome, {new_user}! Registration successful.")
-                pause()
-
-            # Exit
-            elif user_type == 4:
-                print("\n👋 Thank you for visiting Jaydip's Library!")
+            elif ch == 3:
                 save_data()
                 exit()
-
             else:
-                print("⚠️ Invalid choice. Enter between 1–4.\n")
+                print("⚠️ Invalid choice. Enter 1-3.\n")
         except ValueError:
             print("❌ Please enter a valid number.\n")
-
 
 # ------------------ Admin Menu ------------------
 def admin_menu():
+    global track, students
+
     while True:
         heading("🧠 ADMIN DASHBOARD")
         print("""
-1️⃣  List all available books
-2️⃣  Add (Donate) a new book
-3️⃣  Delete a book
-4️⃣  View all issued book records
-5️⃣  Search for a book
-6️⃣  Logout
+1. View Books
+2. Add Book
+3. Delete Book
+4. View Issued Records (All)
+5. Search Book
+6. Register Student
+7. View Students
+8. Delete Student
+9. View Student Issue History
+10. Logout
 """)
         try:
-            choice = int(input("👉 Enter choice (1–6): "))
-            if choice == 1:
+            ch = int(input("Choice (1-10): "))
+            if ch == 1:
                 library.displayAvailableBooks()
-            elif choice == 2:
-                book = input("Enter name of the book to add: ").strip()
-                library.donateBook(book)
-            elif choice == 3:
-                book = input("Enter book name to delete: ").strip()
-                library.deleteBook(book)
-            elif choice == 4:
-                heading("📘 ISSUED BOOK RECORDS")
-                if len(track) == 0:
-                    print("No books currently issued.")
+            elif ch == 2:
+                library.donateBook(input("Book Name: "))
+            elif ch == 3:
+                library.deleteBook(input("Book Name: "))
+            elif ch == 4:
+                heading("📘 ALL ISSUED RECORDS")
+                if track:
+                    for r in track:
+                        print(f"{r['book']} → {r['user']} ({r['issued_on']})")
                 else:
-                    for record in track:
-                        print(f"📗 {record['book']} → {record['user']} ({record['issued_on']})")
+                    print("No issued records.")
                 pause()
-            elif choice == 5:
-                query = input("Enter search keyword: ").strip()
-                library.searchBook(query)
-            elif choice == 6:
-                print("💾 Logging out...")
-                sleep(1)
+            elif ch == 5:
+                library.searchBook(input("Search Keyword: "))
+            elif ch == 6:
+                u = input("New Student Username: ")
+                if u in students:
+                    print("⚠️ Username already exists.")
+                else:
+                    students[u] = input("Password: ")
+                    print("🎉 Student registered.")
+                pause()
+            elif ch == 7:
+                heading("👨‍🎓 REGISTERED STUDENTS")
+                if students:
+                    for s in students:
+                        print(s)
+                else:
+                    print("No students registered yet.")
+                pause()
+            elif ch == 8:
+                d = input("Enter student username to delete: ")
+                if d in students:
+                    del students[d]
+                    track = [r for r in track if r["user"] != d]
+                    print("🗑️ Student deleted.")
+                else:
+                    print("⚠️ Student not found.")
+                pause()
+            elif ch == 9:
+                user = input("Enter student username to view history: ")
+                heading(f"📜 ISSUE HISTORY: {user}")
+                found = False
+                for r in track:
+                    if r["user"] == user:
+                        print(f"{r['book']} ({r['issued_on']})")
+                        found = True
+                if not found:
+                    print("No history found.")
+                pause()
+            elif ch == 10:
                 save_data()
                 break
             else:
-                print("⚠️ Invalid option.\n")
-        except ValueError:
-            print("❌ Enter a valid number.\n")
-
-
-# ------------------ Student Menu ------------------
-def student_menu(username):
-    s = Student(username)
-    while True:
-        heading(f"🎓 STUDENT DASHBOARD ({username})")
-        print("""
-1️⃣  Borrow a book
-2️⃣  Return a book
-3️⃣  Search for a book
-4️⃣  Logout
-""")
-        try:
-            choice = int(input("👉 Enter choice (1–4): "))
-            if choice == 1:
-                book = s.requestBook()
-                library.borrowBook(username, book)
-            elif choice == 2:
-                book = s.returnBook()
-                library.returnBook(username, book)
-            elif choice == 3:
-                query = input("Enter keyword to search: ").strip()
-                library.searchBook(query)
-            elif choice == 4:
-                print(f"💾 Logging out, {username}...")
-                sleep(1)
-                save_data()
-                break
-            else:
-                print("⚠️ Invalid input.\n")
+                print("⚠️ Invalid choice. Enter 1-10.\n")
         except ValueError:
             print("❌ Please enter a valid number.\n")
 
+# ------------------ Student Menu ------------------
+def student_menu(username):
+    while True:
+        heading(f"🎓 STUDENT DASHBOARD ({username})")
+        print("""
+1. Borrow Book
+2. Return Book
+3. Search Book
+4. View My Issue History
+5. Logout
+""")
+        try:
+            ch = int(input("Choice (1-5): "))
+            if ch == 1:
+                library.borrowBook(username, input("Book Name: "))
+            elif ch == 2:
+                library.returnBook(username, input("Book Name: "))
+            elif ch == 3:
+                library.searchBook(input("Search Keyword: "))
+            elif ch == 4:
+                heading(f"📜 YOUR ISSUE HISTORY ({username})")
+                found = False
+                for r in track:
+                    if r["user"] == username:
+                        print(f"{r['book']} ({r['issued_on']})")
+                        found = True
+                if not found:
+                    print("No history found.")
+                pause()
+            elif ch == 5:
+                save_data()
+                break
+            else:
+                print("⚠️ Invalid choice. Enter 1-5.\n")
+        except ValueError:
+            print("❌ Please enter a valid number.\n")
 
 # ------------------ Main ------------------
-if __name__ == "__main__":
-    books_list, track, students = load_data()
-    library = Library(books_list)
+books_list, track, students = load_data()
+library = Library(books_list)
 
-    heading("📖 WELCOME TO JAYDIP'S DIGITAL LIBRARY 📖")
-    while True:
-        login()
+heading("📖 JAYDIP'S DIGITAL LIBRARY")
+while True:
+    login()
+
+
 
