@@ -83,7 +83,7 @@ Login Menu:
 
 3️⃣  Delete a book
 
-4️⃣  View all issued book records 
+4️⃣  View all issued book records
 
 5️⃣  Search for a book
 
